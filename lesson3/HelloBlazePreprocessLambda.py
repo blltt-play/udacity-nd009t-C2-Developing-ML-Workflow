@@ -5,17 +5,17 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
-BUCKET_NAME = 'FILL_THIS_IN'
-PREFIX = 'FILL_THIS_IN'
+BUCKET_NAME = 'udacity-nd009t-c2'
+PREFIX = 'l3e1'
 
-# Function below unzips the archive to the local directory. 
+# Function below unzips the archive to the local directory.
 
 def unzip_data(input_data_path):
     with zipfile.ZipFile(input_data_path, 'r') as input_data_zip:
         input_data_zip.extractall('/tmp/')
         return '/tmp/' + input_data_zip.namelist()[0]
 
-# Input data is a file with a single JSON object per line with the following format: 
+# Input data is a file with a single JSON object per line with the following format:
 # {
 #  "reviewerID": <string>,
 #  "asin": <string>,
@@ -30,7 +30,7 @@ def unzip_data(input_data_path):
 #  "unixReviewTime": <int>,
 #  "reviewTime": "<string>"
 # }
-# 
+#
 # We are specifically interested in the fields "helpful" and "reviewText"
 #
 
@@ -38,7 +38,7 @@ def label_data(input_data):
     labeled_data = []
     HELPFUL_LABEL = "__label__1"
     UNHELPFUL_LABEL = "__label__2"
-     
+
     for l in open(input_data, 'r'):
         l_object = json.loads(l)
         helpful_votes = float(l_object['helpful'][0])
@@ -49,16 +49,16 @@ def label_data(input_data):
                 labeled_data.append(" ".join([HELPFUL_LABEL, reviewText]))
             elif helpful_votes / total_votes < .5:
                 labeled_data.append(" ".join([UNHELPFUL_LABEL, reviewText]))
-          
+
     return labeled_data
 
 
-# Labeled data is a list of sentences, starting with the label defined in label_data. 
+# Labeled data is a list of sentences, starting with the label defined in label_data.
 
 def split_sentences(labeled_data):
     new_split_sentences = []
     for d in labeled_data:
-        label = d.split()[0]        
+        label = d.split()[0]
         sentences = " ".join(d.split()[1:]).split(".") # Initially split to separate label, then separate sentences
         for s in sentences:
             if s: # Make sure sentences isn't empty. Common w/ "..."
@@ -99,7 +99,7 @@ def download_data(s3_input_uri):
     file_name = '/tmp/' + os.path.basename(input_object)
     s3.download_file(input_bucket, input_object, file_name)
     return file_name
-        
+
 def preprocess(s3_input_uri):
     f_name = download_data(s3_input_uri)
     unzipped_path = unzip_data(f_name)
