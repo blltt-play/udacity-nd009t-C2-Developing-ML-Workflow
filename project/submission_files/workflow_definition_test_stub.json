@@ -1,0 +1,70 @@
+{
+  "Comment": "sconesWorkflow",
+  "StartAt": "Pass, Inject test payload",
+  "States": {
+    "Pass, Inject test payload": {
+      "Type": "Pass",
+      "Next": "Lambda Invoke, sconesImageSerialize",
+      "Result": {
+        "body": {
+          "s3_bucket": "sagemaker-us-east-1-368907551342",
+          "s3_key": "test/bicycle_s_000513.png"
+        }
+      }
+    },
+    "Lambda Invoke, sconesImageSerialize": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "arn:aws:lambda:us-east-1:368907551342:function:sconesImageSerialize:$LATEST"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Lambda Invoke, sconesImageClassify"
+    },
+    "Lambda Invoke, sconesImageClassify": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "arn:aws:lambda:us-east-1:368907551342:function:sconesImageClassify:$LATEST"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Lambda Invoke, sconesInferenceConfidence"
+    },
+    "Lambda Invoke, sconesInferenceConfidence": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "arn:aws:lambda:us-east-1:368907551342:function:sconesInferenceConfidence:$LATEST"
+      },
+      "End": true
+    }
+  }
+}

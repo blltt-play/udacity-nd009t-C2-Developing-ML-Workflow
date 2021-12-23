@@ -5,7 +5,7 @@ THRESHOLD = .93
 def lambda_handler(event, context):
 
     # Grab the inferences from the event
-    inferences = event['inferences']
+    inferences = event['body']['inferences']
 
     # b'[0.91, 0.09]' indicates the probability of
     # being a bike is 91% and being a motorcycle is 9%.
@@ -21,5 +21,7 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
-        'body': json.dumps(event)
+        'body': {
+            "inferences": inferences
+        }
     }

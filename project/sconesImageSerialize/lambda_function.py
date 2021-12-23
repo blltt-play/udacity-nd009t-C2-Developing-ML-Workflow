@@ -8,8 +8,8 @@ def lambda_handler(event, context):
     """A function to serialize target data from S3"""
 
     # Get the s3 address from the Step Function event input
-    key = event['s3_key']
-    bucket = event['s3_bucket']
+    key = event['body']['s3_key']
+    bucket = event['body']['s3_bucket']
 
     # Download the data from s3 to /tmp/image.png
     temp_image_file = '/tmp/image.png'
@@ -27,6 +27,5 @@ def lambda_handler(event, context):
             "image_data": image_data,
             "s3_bucket": bucket,
             "s3_key": key,
-            "inferences": []
         }
     }
